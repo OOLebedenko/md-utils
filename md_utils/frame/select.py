@@ -21,7 +21,6 @@ def select_sec_str_ca_atoms(path_to_pdb: str,
                             molname: str,
                             ) -> AtomSelection:
     """
-    :param: frame: frame in MD trajectory
     :param path_to_pdb:
     :param molname: name of molecules.
                     For example, reference structure is complex so that it contains two molecules of interacting partner
