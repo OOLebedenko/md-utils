@@ -9,7 +9,7 @@ def pdb_to_fasta(frame: Frame) -> None:
     """  
     aa_code = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
      'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N', 
-     'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W', 
+     'GLY': 'A', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W', 
      'ALN': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M'}
     
     output = []
