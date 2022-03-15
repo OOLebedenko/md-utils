@@ -8,7 +8,7 @@ def extract_residues_on_interface(partner_A: Molecule,
     """
     Extract residues on interface of complex between partner_A and partner_B
     :param partner_A:
-    :param partner_B:
+    :param partner_b:
     :param cutoff: distance cutoff in angstroms
     :return: list of [residues of partner_A, residues of partner_B] - residues on interface
                   of interaction between partner_A and partner_B within the distance cutoff
