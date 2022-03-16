@@ -1,4 +1,4 @@
-from pyxmolpp2 import Molecule, Residue, AngleValue, ResidueSelection
+from pyxmolpp2 import Molecule, Residue, AtomSelection, ResidueSelection, aId
 from scipy.spatial import cKDTree # to compute distacnes
 from typing import List
 import numpy as np
@@ -24,20 +24,16 @@ def extract_residues_on_interface(partner_A: Molecule,
     dist = dist.toarray()
 
     # get atom indexes in cut-off range
-    a_index, b_index = np.where(dist > 0)
-    a_index, b_index = set(a_index), set(b_index)
+    a_index, b_index = dist.nonzero()
 
-    # collect corresponding residues into sets
-    res_a, res_b = set(), set()
+    # get corresponding residues
+    first_a_index = partner_A.atoms[0].index # to correct indexes from matrix
+    resdue_selection_A = partner_A.atoms.filter(aId.is_in(set(a_index + first_a_index))).residues
+    
+    first_b_index = partner_B.atoms[0].index # to correct indexes from matrix
+    resdue_selection_B = partner_B.atoms.filter(aId.is_in(set(b_index + first_b_index))).residues
 
-    a_atoms, b_atoms = partner_A.atoms, partner_B.atoms
-    for index in a_index:
-      res_a.add(a_atoms[index].residue.index)
-
-    for index in b_index:
-      res_b.add(b_atoms[index].residue.index)
-
-    return [list(res_a), list(res_b)]
+    return [resdue_selection_A, resdue_selection_B]
     
 
 if __name__ == "__main__":
