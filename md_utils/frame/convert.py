@@ -8,27 +8,26 @@ def pdb_to_fasta(frame: Frame) -> None:
     :return: file in FASTA format
     """
     # dictionary to convert canonical residue names
-    d = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
+    aa_dictionary = {'CYS': 'C', 'ASP': 'D', 'SER': 'S', 'GLN': 'Q', 'LYS': 'K',
      'ILE': 'I', 'PRO': 'P', 'THR': 'T', 'PHE': 'F', 'ASN': 'N',
      'GLY': 'G', 'HIS': 'H', 'LEU': 'L', 'ARG': 'R', 'TRP': 'W',
-     'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M'}
+     'ALA': 'A', 'VAL':'V', 'GLU': 'E', 'TYR': 'Y', 'MET': 'M'
+     'GLH': 'E', 'ASH': 'D', 'HID': 'H', 'HIP': 'H', 'HIE': 'H',
+     'CYX': 'C', 'CYM': 'C'}
 
     sequences = [] # list to save sequences
     
+    # filter out protein residues only
+    molecules = frame.atoms.residues.filter(rName.is_in(set(aa_dictionary.keys()))).molecules
+    
     # iterate over chains in frame
-    for mol in frame.molecules:
+    for mol in molecules:
       name = mol.name # save sequence name
       seq = '' # string to append sequence
       # iterate over residues to save sequence
       for res in mol.residues:
-        try:
-          r = d[res.name]
+          r = aa_dictionary[res.name]
           seq += r
-        except: # if there are unrecognized residues break and leave an empty record
-          seq = ''
-          break
-
-      sequences.append([name, seq])
 
     # save sequences in .fasta
     with open('new_file.fasta' , 'w') as f:
@@ -42,10 +41,6 @@ def pdb_to_fasta(frame: Frame) -> None:
 
 if __name__ == "__main__":
     from pyxmolpp2 import PdbFile
-
-    # можно дополнительно усовершенствовать функцию
-    # передавать в функцию имя файла, чтобы отразить его в фаста
-
     path_to_pdb = '7jzu.pdb'
     frame = PdbFile(path_to_pdb).frames()[0]
     sequence = pdb_to_fasta(frame=frame)
