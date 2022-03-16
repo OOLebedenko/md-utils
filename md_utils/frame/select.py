@@ -45,7 +45,7 @@ def select_sec_str_ca_atoms(path_to_pdb: str,
     frame = PdbFile(path_to_pdb).frames()[0]
     
     # return atoms filtered by residue id and CA type
-    return frame[molname].atoms.filter(rId.is_in(set(sec_str_rids))).filter(aName=="CA")
+    return frame[molname].atoms.filter((rId.is_in(set(sec_str_rids))) & (aName == "CA")))
                                            
 
 if __name__ == "__main__":
