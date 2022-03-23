@@ -1,14 +1,15 @@
 from typing import List
 from pyxmolpp2 import AtomSelection, aName, rId, PdbFile
 from Bio.PDB.DSSP import dssp_dict_from_pdb_file
+import os
 
 
-def get_sec_str_residue_ids(path_to_pdb: str,
+def get_sec_str_residue_ids(frame: Frame,
                             molname: str
                             ) -> List[int]:
     """
     to predict the secondary structure residues use DSSP https://biopython.org/docs/1.76/api/Bio.PDB.DSSP.html
-    :param path_to_pdb:
+    :param frame:
     :param molname:
     :return: list of residue id, which belongs to secondary-structure region
              helix - H (Alpha helix (4-12), G (3-10 helix) and I (Pi helix)
@@ -16,7 +17,8 @@ def get_sec_str_residue_ids(path_to_pdb: str,
              strand E (Strand) and B (Isolated beta-bridge residue),
     """
     # predict secondary structure from input pdb
-    dssp_tuple = dssp_dict_from_pdb_file(path_to_pdb)
+    frame.to_pdb("temp.pdb")
+    dssp_tuple = dssp_dict_from_pdb_file("temp.pdb")
     dssp_dict = dssp_tuple[0]
 
     # get structured residues from target molecule
@@ -28,18 +30,19 @@ def get_sec_str_residue_ids(path_to_pdb: str,
             
     return res_id
 
+    return sec_str_rids
 
 
-def select_sec_str_ca_atoms(path_to_pdb: str,
+def select_sec_str_ca_atoms(frame: Frame,
                             molname: str,
                             ) -> AtomSelection:
     """
-    :param path_to_pdb:
+    :param frame:
     :param molname: name of molecules.
                     For example, reference structure is complex so that it contains two molecules of interacting partner
     :return: CA atoms belongs to secondary structured regions
     """
-    sec_str_rids = get_sec_str_residue_ids(path_to_pdb=path_to_pdb,
+    sec_str_rids = get_sec_str_residue_ids(frame=frame,
                                            molname=molname)
     # get frame
     frame = PdbFile(path_to_pdb).frames()[0]
@@ -50,5 +53,7 @@ def select_sec_str_ca_atoms(path_to_pdb: str,
 
 if __name__ == "__main__":
     path_to_pdb = "7jzu.pdb"
+    frame = PdbFile(path_to_pdb).frames()[0]
 
-    ss_ca_atoms = select_sec_str_ca_atoms(path_to_pdb, molname="A")
+    sec_str_rids = get_sec_str_residue_ids(frame, molname="A")
+    sec_str_CA_atoms = select_sec_str_ca_atoms(frame, molname="A")
