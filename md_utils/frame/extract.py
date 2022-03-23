@@ -42,7 +42,7 @@ if __name__ == "__main__":
     path_to_pdb = "path to your pdb"
     frame = PdbFile(path_to_pdb).frames()[0]
 
-    [interface_residues_partner_A, interface_residues_partner_B] = extract_residues_on_interface(
+    interface_residues_partner_A, interface_residues_partner_B = extract_residues_on_interface(
         partner_A=frame.molecules.filter(mName == "A"),
         partner_B=frame.molecules.filter(mName == "B"),
         cutoff=5)
