@@ -1,5 +1,6 @@
 from typing import List
-from pyxmolpp2 import AtomSelection
+from pyxmolpp2 import AtomSelection, aName, rId, PdbFile
+from Bio.PDB.DSSP import dssp_dict_from_pdb_file
 
 
 def get_sec_str_residue_ids(path_to_pdb: str,
@@ -14,7 +15,19 @@ def get_sec_str_residue_ids(path_to_pdb: str,
              or
              strand E (Strand) and B (Isolated beta-bridge residue),
     """
-    ...
+    # predict secondary structure from input pdb
+    dssp_tuple = dssp_dict_from_pdb_file(path_to_pdb)
+    dssp_dict = dssp_tuple[0]
+
+    # get structured residues from target molecule
+    res_id = []
+
+    for key in dssp_dict.keys():
+        if (key[0] == molname) and (dssp_dict[key][1] in ['H', 'G', 'I', 'E', 'B']):
+            res_id.append(key[1][1])
+            
+    return res_id
+
 
 
 def select_sec_str_ca_atoms(path_to_pdb: str,
@@ -28,8 +41,12 @@ def select_sec_str_ca_atoms(path_to_pdb: str,
     """
     sec_str_rids = get_sec_str_residue_ids(path_to_pdb=path_to_pdb,
                                            molname=molname)
-    ...
-
+    # get frame
+    frame = PdbFile(path_to_pdb).frames()[0]
+    
+    # return atoms filtered by residue id and CA type
+    return frame[molname].atoms.filter((rId.is_in(set(sec_str_rids))) & (aName == "CA")))
+                                           
 
 if __name__ == "__main__":
     path_to_pdb = "7jzu.pdb"
