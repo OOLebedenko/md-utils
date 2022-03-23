@@ -76,7 +76,11 @@ if __name__ == "__main__":
     path_to_pdb = "path to your pdb"
     frame = PdbFile(path_to_pdb).frames()[0]
 
+    # example usage of extract_residues_on_interface
     interface_residues_partner_A, interface_residues_partner_B = extract_residues_on_interface(
         partner_A=frame.molecules.filter(mName == "A"),
         partner_B=frame.molecules.filter(mName == "B"),
         cutoff=5)
+
+    # example usage of extract_one_letter_amino_acid_seq
+    amino_acid_seq = extract_one_letter_amino_acid_seq(frame, molname="A")
