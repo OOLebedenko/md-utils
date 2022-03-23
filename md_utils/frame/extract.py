@@ -1,6 +1,40 @@
-from pyxmolpp2 import Molecule, MoleculeSelection, ResidueSelection, aId
+from pyxmolpp2 import Frame, mName, Molecule, MoleculeSelection, ResidueSelection, rName, aId
 from scipy.spatial import cKDTree
 from typing import List, Union
+
+
+def extract_one_letter_amino_acid_seq(frame: Frame,
+                                      molname: mName) -> list:
+    """
+    extract one letter amino asids sequence for the specific molecule in frame
+    :param frame:
+    :param molname: name of molecule in frame
+    :return: list of one letter amino acids for the specific molecule in frame
+    """
+    # dictionary to convert canonical residue names
+    three_to_one_leter_name = {"GLY": "G",
+                               "ALA": "A",
+                               "VAL": "V",
+                               "LEU": "L",
+                               "ILE": "I",
+                               "SER": "S",
+                               "THR": "T",
+                               "MET": "M",
+                               "CYS": "C",
+                               "ASN": "N",
+                               "GLN": "Q",
+                               "ASP": "D",
+                               "GLU": "E",
+                               "LYS": "K",
+                               "ARG": "R",
+                               "HIS": "H",
+                               "PHE": "F",
+                               "TRP": "W",
+                               "TYR": "Y",
+                               "PRO": "P",
+                               }
+
+    return [three_to_one_leter_name[residue.name] for residue in frame.molecules.filter(mName == molname).residues]
 
 
 def extract_residues_on_interface(partner_A: Union[Molecule, MoleculeSelection],
