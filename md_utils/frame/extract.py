@@ -1,14 +1,16 @@
-from pyxmolpp2 import Molecule, aId
-from scipy.spatial import cKDTree  # to compute distacnes
+from pyxmolpp2 import Molecule, MoleculeSelection, ResidueSelection, aId
+from scipy.spatial import cKDTree
+from typing import List, Union
 
 
-def extract_residues_on_interface(partner_A: Molecule,
-                                  partner_B: Molecule,
-                                  cutoff: float):
+def extract_residues_on_interface(partner_A: Union[Molecule, MoleculeSelection],
+                                  partner_B: Union[Molecule, MoleculeSelection],
+                                  cutoff: float
+                                  ) -> List[ResidueSelection]:
     """
     Extract residues on interface of complex between partner_A and partner_B
-    :param partner_A:
-    :param partner_B:
+    :param partner_A: first partner of intermolecular interaction
+    :param partner_B: second partner of intermolecular interaction
     :param cutoff: distance cutoff in angstroms
     :return: list of [residues of partner_A, residues of partner_B] - residues on interface
                   of interaction between partner_A and partner_B within the distance cutoff
@@ -26,7 +28,6 @@ def extract_residues_on_interface(partner_A: Molecule,
 
     # get corresponding residues
     first_a_id = partner_A.atoms[0].id  # to correct indexes from matrix
-    # atom_index + first_atom_index + (first_atom_id - first_atom_index) = atom_index + first_atom_id
     resdue_selection_A = partner_A.atoms.filter(aId.is_in(set(a_index + first_a_id))).residues
 
     first_b_id = partner_B.atoms[0].id  # to correct indexes from matrix
