@@ -1,6 +1,6 @@
-from pyxmolpp2 import Frame, mName, Molecule, MoleculeSelection, ResidueSelection, rName, aId
+from pyxmolpp2 import Frame, mName, Molecule, MoleculeSelection, ResidueSelection, AtomSelection, Atom, aId
 from scipy.spatial import cKDTree
-from typing import List, Union
+from typing import List, Union, Tuple
 
 
 def extract_one_letter_amino_acid_seq(frame: Frame,
@@ -68,6 +68,23 @@ def extract_residues_on_interface(partner_A: Union[Molecule, MoleculeSelection],
     resdue_selection_B = partner_B.atoms.filter(aId.is_in(set(b_index + first_b_id))).residues
 
     return [resdue_selection_A, resdue_selection_B]
+
+
+def extract_hydrogen_bonds(partner_A: Union[Molecule, MoleculeSelection],
+                           partner_B: Union[Molecule, MoleculeSelection],
+                           distance_cutoff=3,
+                           angle_cutoff=30,
+                           ) -> List[Tuple[Union[Atom, AtomSelection]]]:
+    """
+    extract hydrogen bond is formed between an atom with a hydrogen bonded to it (the donor, D)
+            and another atom (the acceptor, A)
+    :param partner_A:
+    :param partner_B:
+    :param distance_cutoff: distance D-A is less than the cut-off distance (default 3.0 Angstroms)
+    :param angle_cutoff: angle D-H-A is less than the cut-off angle (default 30 degrees)
+    :return:
+    """
+    ...
 
 
 if __name__ == "__main__":
