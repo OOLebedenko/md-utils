@@ -1,5 +1,5 @@
 from typing import List
-from pyxmolpp2 import AtomSelection, aName, rId, PdbFile
+from pyxmolpp2 import AtomSelection, aName, rId, PdbFile, Frame
 from Bio.PDB.DSSP import dssp_dict_from_pdb_file
 import os
 
@@ -22,13 +22,13 @@ def get_sec_str_residue_ids(frame: Frame,
     dssp_dict = dssp_tuple[0]
 
     # get structured residues from target molecule
-    res_id = []
+    sec_str_rids = []
 
     for key in dssp_dict.keys():
         if (key[0] == molname) and (dssp_dict[key][1] in ['H', 'G', 'I', 'E', 'B']):
-            res_id.append(key[1][1])
-            
-    return res_id
+            sec_str_rids.append(key[1][1])
+
+    os.remove("temp.pdb")
 
     return sec_str_rids
 
