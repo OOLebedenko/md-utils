@@ -1,5 +1,5 @@
 from typing import List
-from pyxmolpp2 import AtomSelection, mName, aName, rId, PdbFile, Frame
+from pyxmolpp2 import AtomSelection, AtomPredicate, mName, aName, rId, PdbFile, Frame
 from Bio.PDB.DSSP import dssp_dict_from_pdb_file
 import functools
 import os
@@ -37,7 +37,7 @@ def get_sec_str_residue_ids(frame: Frame,
 
 def get_sec_str_residues_predicate(frame: Frame,
                                    molnames: list
-                                   ):
+                                   ) -> AtomPredicate:
     """
     :param frame:
     :param molnames: list of molecules names. for example ["A"] or ["A", "B"]
