@@ -1,7 +1,9 @@
 from typing import List
-from pyxmolpp2 import AtomSelection, aName, rId, PdbFile, Frame
+from pyxmolpp2 import AtomSelection, AtomPredicate, mName, aName, rId, PdbFile, Frame
 from Bio.PDB.DSSP import dssp_dict_from_pdb_file
+import functools
 import os
+import operator
 
 
 def get_sec_str_residue_ids(frame: Frame,
@@ -33,20 +35,38 @@ def get_sec_str_residue_ids(frame: Frame,
     return sec_str_rids
 
 
+def get_sec_str_residues_predicate(frame: Frame,
+                                   molnames: list
+                                   ) -> AtomPredicate:
+    """
+    :param frame:
+    :param molnames: list of molecules names. for example ["A"] or ["A", "B"]
+                    For example, reference structure is complex so that it contains two molecules (A and B)
+    :return: CA atoms belongs to secondary structured regions
+    """
+    sec_str_residues = []
+    for molname in molnames:
+        sec_str_rids = get_sec_str_residue_ids(frame=frame,
+                                               molname=molname)
+        sec_str_residues.append((rId.is_in(set(sec_str_rids))) & (mName == molname))
+
+    sec_str_residues_predicate = functools.reduce(operator.or_, sec_str_residues)
+
+    return sec_str_residues_predicate
+
+
 def select_sec_str_ca_atoms(frame: Frame,
-                            molname: str,
+                            molnames: list,
                             ) -> AtomSelection:
     """
     :param frame:
-    :param molname: name of molecules.
-                    For example, reference structure is complex so that it contains two molecules of interacting partner
+    :param molnames: list of molecules names. for example ["A"] or ["A", "B"]
+                    For example, reference structure is complex so that it contains two molecules (A and B)
     :return: CA atoms belongs to secondary structured regions
     """
-    sec_str_rids = get_sec_str_residue_ids(frame=frame,
-                                           molname=molname)
 
-    # return atoms filtered by residue id and CA type
-    return frame[molname].atoms.filter((rId.is_in(set(sec_str_rids))) & (aName == "CA"))
+    sec_str_residues_predicate = get_sec_str_residues_predicate(frame, molnames)
+    return frame.atoms.filter(sec_str_residues_predicate & (aName == "CA"))
 
 
 if __name__ == "__main__":
@@ -54,4 +74,4 @@ if __name__ == "__main__":
     frame = PdbFile(path_to_pdb).frames()[0]
 
     sec_str_rids = get_sec_str_residue_ids(frame, molname="A")
-    sec_str_CA_atoms = select_sec_str_ca_atoms(frame, molname="A")
+    sec_str_CA_atoms = select_sec_str_ca_atoms(frame, molnames=["A"])
