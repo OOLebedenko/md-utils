@@ -1,4 +1,5 @@
 import re
+import sys
 
 # rosetta hydrogen pattern to substitute
 hydrogen_pattern = re.compile(r"\d[A-Z]+\d*")
@@ -39,7 +40,8 @@ def clean_rosetta_pdb(path_to_pdb):
       result = hydrogen_pattern.search(line)
       if result is not None:
         h = result.group(0)[1:] + result.group(0)[0] # replace index
-        line = re.sub(hydrogen_pattern, h, line) # substitute atom name
+        # line = re.sub(hydrogen_pattern, h, line) # substitute atom name
+        line.replace(hydrogen_pattern, h) # more efficient replacement, avoid regex symbol difficulties
         fixed_atoms = True
       cleaned_pdb.append(line)
 
@@ -50,5 +52,5 @@ def clean_rosetta_pdb(path_to_pdb):
       print('No hydrogen atoms requiring fixes were found')
 
 if __name__ == "__main__":
-    path_to_pdb = 'your path'
+    path_to_pdb = sys.argv[1] # allow to launch on several files in dir with bash
     clean_rosetta_pdb(path_to_pdb)
