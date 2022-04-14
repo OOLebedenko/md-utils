@@ -77,6 +77,11 @@ def extract_residues_on_interface(partner_A: Union[Molecule, MoleculeSelection],
 
 def get_predicate_donors(donors_dict: Dict[str, list]
                          ) -> AtomPredicate:
+    """
+    generate donor atoms predicate from data in HydrogenBondSites.json
+    :param donors_dict: dictionary containing donor atoms pairs
+    :return: AtomPredicate for donor atoms
+    """
     donors_predicate = []
     for rname in donors_dict:
         atoms_donor = []
@@ -89,11 +94,47 @@ def get_predicate_donors(donors_dict: Dict[str, list]
 
 def get_predicate_acceptors(acceptor_dict: Dict[str, list]
                             ) -> AtomPredicate:
+    """
+    generate acceptor atoms predicate from data in HydrogenBondSites.json
+    :param acceptor_dict: dictionary containing acceptor atoms
+    :return: AtomPredicate for acceptor atoms
+    """
     acceptor_predicate = []
     for ind, rname in enumerate(acceptor_dict):
         acceptor_predicate.append((rName == rname) & (aName.is_in(set(acceptor_dict[rname]))))
 
     return functools.reduce(operator.or_, acceptor_predicate)
+
+
+def get_attached_hydrogens(donor_atom, hydrogen_bonds_sites) -> List:
+    """
+    retreive hydrogens attached to the donor atom
+    :param donor_atom: Atom object
+    :param hydrogen_bonds_sites: a dictionary from HydrogenBondSites.json
+    :return: List containing Atom objects
+    """
+    hydrogens = []
+    da_pairs = hydrogen_bonds_sites['HydrogenBondDonors'][donor_atom.residue.name]
+    for pair in da_pairs:
+        if pair[0] == donor_atom.name:
+            new_h = donor_atom.residue.atoms.filter(aName == pair[1])
+            if len(new_h) > 0:
+                hydrogens.append(new_h[0])
+    return hydrogens
+
+
+def angle(l1, l2) -> float:
+    """
+    calculate angle between 2 vectors
+    :params l1, l2: numpy.array vectors
+    :return: float value of an angle
+    """
+    l1 = l1 / np.linalg.norm(l1)  # normalization of vectors
+    l2 = l2 / np.linalg.norm(l2)
+    cos = np.dot(l1, l2)
+    rad = np.arccos(np.clip(cos, -1.0, 1.0))
+    deg = np.rad2deg(rad)
+    return deg
 
 
 def extract_hydrogen_bonds(partner_A: Union[Molecule, MoleculeSelection],
@@ -111,7 +152,7 @@ def extract_hydrogen_bonds(partner_A: Union[Molecule, MoleculeSelection],
     :return: List containing pairs of D-A atoms
     """
     # load data about donors and acceptors
-    with open('HydrogenBondSites.json', 'r') as f:
+    with open('./supporting_data/HydrogenBondSites.json', 'r') as f:
         hydrogen_bonds_sites = json.load(f)
     donors_dict = hydrogen_bonds_sites["HydrogenBondDonors"]
     acceptors_dict = hydrogen_bonds_sites["HydrogenBondAcceptors"]
@@ -120,26 +161,10 @@ def extract_hydrogen_bonds(partner_A: Union[Molecule, MoleculeSelection],
     donors_predicate = get_predicate_donors(donors_dict)
     acceptors_predicate = get_predicate_acceptors(acceptors_dict)
 
-    def get_hydrogens(donor_atom):  # retreive hydrogens attached to the donor atom
-        hydrogens = []
-        da_pairs = hydrogen_bonds_sites['HydrogenBondDonors'][donor_atom.residue.name]
-        for pair in da_pairs:
-            if pair[0] == donor_atom.name:
-                new_h = donor_atom.residue.atoms.filter(aName == pair[1])
-                if len(new_h) > 0:
-                    hydrogens.append(new_h[0])
-        return hydrogens
+    hydrogen_bonded = []
+    for donor_chain, acceptor_chain in [(partner_A, partner_B), (partner_B, partner_A)]:
 
-    def angle(a, b, h):  # calculate criteria angle
-        l1 = (h - a) / np.linalg.norm(h - a)  # normalization of vectors
-        l2 = (h - b) / np.linalg.norm(h - b)
-        cos = np.dot(l1, l2)
-        rad = np.arccos(np.clip(cos, -1.0, 1.0))
-        deg = np.rad2deg(rad)
-        return 180 - deg
-
-    def get_donor_acceptor_pairs(donor_chain, acceptor_chain):
-        # specify donor and acceptor atoms
+        # extract donor and acceptor atoms
         donor_atoms = donor_chain.atoms.filter(donors_predicate)
         acceptor_atoms = acceptor_chain.atoms.filter(acceptors_predicate)
 
@@ -149,28 +174,19 @@ def extract_hydrogen_bonds(partner_A: Union[Molecule, MoleculeSelection],
 
         # compute distances with a cut-off
         dist = donor_tree.sparse_distance_matrix(acceptor_tree, max_distance=distance_cutoff)
-        # get indices of close atoms
-        donor_ind, acceptor_ind = dist.toarray().nonzero()
-
-        # retrieve close atoms
-        selected_donors, selected_acceptors = [], []
-        for ind in donor_ind:
-            selected_donors.append(donor_atoms[ind])
-        for ind in acceptor_ind:
-            selected_acceptors.append(acceptor_atoms[ind])
+        # get indexes of close atoms
+        donor_indexes, acceptor_indexes = dist.toarray().nonzero()
 
         # for each pair find donor's hydrogens and calculate angle
-        # if angle does not exceed threshold - add pair to output
-        h_bonded = []
-        for don_atom, acc_atom in zip(selected_donors, selected_acceptors):
-            hydrogens = get_hydrogens(don_atom)
-            for h in hydrogens:
-                if angle(don_atom.r.values, acc_atom.r.values, h.r.values) <= angle_cutoff:
-                    h_bonded.append((don_atom, acc_atom))
+        # if angle does not exceed threshold - add pair to hydrogen_bonded
+        for donor_index, acceptor_index in zip(donor_indexes, acceptor_indexes):
+            donor_atom, acceptor_atom = donor_atoms[donor_index], acceptor_atoms[acceptor_index]
+            hydrogens = get_attached_hydrogens(donor_atom, hydrogen_bonds_sites)
+            for hydrogen in hydrogens:
+                if 180 - angle(hydrogen.r.values - donor_atom.r.values, h.r.values - acceptor_atom.r.values) <= angle_cutoff:
+                    hydrogen_bonded.append((donor_atom, acceptor_atom))
 
-        return h_bonded
-
-    return get_donor_acceptor_pairs(partner_A, partner_B) + get_donor_acceptor_pairs(partner_B, partner_A)
+    return hydrogen_bonded
 
 
 if __name__ == "__main__":
