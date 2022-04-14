@@ -6,7 +6,10 @@ import numpy as np
 import functools
 import operator
 import json
+from pathlib import Path
 
+# define path to supporting data
+resource_path = Path(__file__).parent / "supporting_data"
 
 def extract_one_letter_amino_acid_seq(frame: Frame,
                                       molname: mName) -> list:
@@ -152,7 +155,7 @@ def extract_hydrogen_bonds(partner_A: Union[Molecule, MoleculeSelection],
     :return: List containing pairs of D-A atoms
     """
     # load data about donors and acceptors
-    with open('./supporting_data/HydrogenBondSites.json', 'r') as f:
+    with open(resource_path.joinpath("HydrogenBondSites.json"), 'r') as f:
         hydrogen_bonds_sites = json.load(f)
     donors_dict = hydrogen_bonds_sites["HydrogenBondDonors"]
     acceptors_dict = hydrogen_bonds_sites["HydrogenBondAcceptors"]
