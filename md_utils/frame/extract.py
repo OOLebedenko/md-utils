@@ -186,7 +186,7 @@ def extract_hydrogen_bonds(partner_A: Union[Molecule, MoleculeSelection],
             donor_atom, acceptor_atom = donor_atoms[donor_index], acceptor_atoms[acceptor_index]
             hydrogens = get_attached_hydrogens(donor_atom, hydrogen_bonds_sites)
             for hydrogen in hydrogens:
-                if 180 - angle(hydrogen.r.values - donor_atom.r.values, h.r.values - acceptor_atom.r.values) <= angle_cutoff:
+                if 180 - angle(hydrogen.r.values - donor_atom.r.values, hydrogen.r.values - acceptor_atom.r.values) <= angle_cutoff:
                     hydrogen_bonded.append((donor_atom, acceptor_atom))
 
     return hydrogen_bonded
