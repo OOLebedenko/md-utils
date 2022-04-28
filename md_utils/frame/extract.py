@@ -9,7 +9,7 @@ import json
 from pathlib import Path
 
 # define path to supporting data
-resource_path = Path(__file__).parent / "supporting_data"
+resource_path = Path(__file__).parent.parent.parent / "data"
 
 def extract_one_letter_amino_acid_seq(frame: Frame,
                                       molname: mName) -> list:
