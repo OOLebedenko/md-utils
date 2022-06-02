@@ -1,5 +1,5 @@
 from pyxmolpp2 import Frame, AtomPredicate, calc_rmsd
-from select import get_sec_str_residues_predicate
+from md_utils.frame.select import get_sec_str_residues_predicate
 
 
 def get_rmsd(reference_frame: Frame,
