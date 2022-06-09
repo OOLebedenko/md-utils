@@ -1,3 +1,4 @@
+import pytest
 import time
 from md_utils.frame.calc import get_rmsd
 from pyxmolpp2.pipe import TrajectoryProcessor
@@ -41,25 +42,6 @@ class CalcRmsd(TrajectoryProcessor):
 
 
 if __name__ == "__main__":
-    from md_utils.frame.select import get_sec_str_residues_predicate
-    from pyxmolpp2 import Trajectory, PdbFile, TrjtoolDatFile
-    from pyxmolpp2.pipe import Run
-    import os
-
-    #  setup trajectory parameters
-    path_to_trajectory = "path to  your reference"
-    path_to_reference = "path to your trajectory"
-    trajectory_start = 1
-    trajectory_length = 10
-
-    #  load trajectory
-    reference = PdbFile(os.path.join(path_to_trajectory, "1_build/ref.pdb"))
-    trajectory = Trajectory(reference.frames()[0])
-    for ind in range(trajectory_start, trajectory_length + 1):
-        fname = "{pattern}.{filetype}".format(pattern="run%05d", filetype="dat")
-        trajectory.extend(TrjtoolDatFile(os.path.join(os.path.join(path_to_trajectory, "5_run"), fname % (ind))))
-
-    # get predicate for alignment
-    predicate = get_sec_str_residues_predicate(frame=reference, molnames=["A", "B"])
-
-    trajectory | CalcRmsd(reference=reference, predicate=predicate, ns_stride=1) | Run()
+    # test CalcRMSD using pytest
+    CalcRMSD_retcode = pytest.main(["../tests/test_trj_rmsd.py"])
+    print(CalcRMSD_retcode)
