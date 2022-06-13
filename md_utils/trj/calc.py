@@ -1,4 +1,3 @@
-import pytest
 import time
 from md_utils.frame.calc import get_rmsd
 from pyxmolpp2.pipe import TrajectoryProcessor
@@ -43,5 +42,6 @@ class CalcRmsd(TrajectoryProcessor):
 
 if __name__ == "__main__":
     # test CalcRMSD using pytest
-    CalcRMSD_retcode = pytest.main(["../tests/test_trj_rmsd.py"])
+    import pytest
+    CalcRMSD_retcode = pytest.main(["../../tests/test_trj_rmsd.py"])
     print(CalcRMSD_retcode)
